@@ -21,7 +21,11 @@ def get_practice_graph():
     practice_graph.add_edge("A", "C")
     practice_graph.add_edge("B", "C")
     # (Your code for Problem 1a goes here.)
-
+    practice_graph.add_edge("B", "D")
+    practice_graph.add_edge("C", "D")  
+    practice_graph.add_edge("C", "F")
+    practice_graph.add_edge("D", "E")  
+    practice_graph.add_edge("D", "F")
     return practice_graph
 
 
@@ -41,7 +45,46 @@ def get_romeo_and_juliet_graph():
     """
     rj = nx.Graph()
     # (Your code for Problem 1b goes here.)
+    characters = ["Nurse", "Friar Laurence", "Tybalt", "Benvolio", 
+                  "Paris", "Mercutio", "Montague", "Capulet", 
+                  "Escalus", "Juliet", "Romeo"]
+    for character in characters:
+        rj.add_node(character)
 
+    rj.add_edge("Nurse", "Juliet")
+    rj.add_edge("Friar Laurence", "Juliet")
+    rj.add_edge("Friar Laurence", "Romeo")
+    rj.add_edge("Tybalt", "Juliet")
+    rj.add_edge("Tybalt", "Capulet")
+    rj.add_edge("Benvolio", "Romeo")
+    rj.add_edge("Benvolio", "Montague")
+    rj.add_edge("Paris", "Escalus")
+    rj.add_edge("Paris", "Capulet")
+    rj.add_edge("Paris", "Mercutio")
+    rj.add_edge("Mercutio", "Paris")
+    rj.add_edge("Mercutio", "Escalus")
+    rj.add_edge("Mercutio", "Romeo")
+    rj.add_edge("Montague", "Escalus")
+    rj.add_edge("Montague", "Romeo")
+    rj.add_edge("Montague", "Benvolio")
+    rj.add_edge("Capulet", "Juliet")
+    rj.add_edge("Capulet", "Tybalt")
+    rj.add_edge("Capulet", "Paris")
+    rj.add_edge("Capulet", "Escalus")
+    rj.add_edge("Escalus", "Paris")
+    rj.add_edge("Escalus", "Mercutio")
+    rj.add_edge("Escalus", "Montague")
+    rj.add_edge("Escalus", "Capulet")
+    rj.add_edge("Juliet", "Nurse")
+    rj.add_edge("Juliet", "Tybalt")
+    rj.add_edge("Juliet", "Capulet")
+    rj.add_edge("Juliet", "Friar Laurence")
+    rj.add_edge("Juliet", "Romeo")
+    rj.add_edge("Romeo", "Friar Laurence")
+    rj.add_edge("Romeo", "Benvolio")
+    rj.add_edge("Romeo", "Montague")
+    rj.add_edge("Romeo", "Mercutio")
+    rj.add_edge("Romeo", "Juliet")
     return rj
 
 
@@ -76,7 +119,16 @@ def friends_of_friends(graph, user):
     friends of the user. The set should not contain the user itself
     or their immediate friends.
     """
-    pass
+    direct_friends = friends(graph, user)
+    fof_set = set()
+    
+    for friend in direct_friends:
+        for fof in graph.neighbors(friend):
+            if fof != user:
+                fof_set.add(fof)
+    
+    return fof_set - direct_friends
+
 
 
 def common_friends(graph, user1, user2):
@@ -89,7 +141,15 @@ def common_friends(graph, user1, user2):
 
     Returns: a set containing the friends user1 and user2 have in common
     """
-    pass
+    friends1 = set(graph.neighbors(user1))
+    friends2 = set(graph.neighbors(user2))
+    common = set()
+    
+    for friend in friends1:
+        if friend in friends2:
+            common.add(friend)
+    
+    return common
 
 
 def num_common_friends_map(graph, user):
@@ -114,7 +174,18 @@ def num_common_friends_map(graph, user):
     Returns: a dictionary mapping each person to the number of (non-zero)
     friends they have in common with the user
     """
-    pass
+    direct_friends = friends(graph, user)
+    common_map = {}
+    
+    for person in graph.nodes():
+        if person == user or person in direct_friends:
+            continue
+        
+        common = len(common_friends(graph, user, person))
+        if common > 0:
+            common_map[person] = common
+    
+    return common_map
 
 
 def num_map_to_sorted_list(map_with_number_vals):
@@ -128,9 +199,14 @@ def num_map_to_sorted_list(map_with_number_vals):
         map_with_number_vals: a dictionary whose values are numbers
 
     Returns: a list of keys, sorted by the values in map_with_number_vals
-    """
-    pass
 
+    """
+    w=sorted(map_with_number_vals.items(), key = itemgetter(0))
+    q=sorted(w, key= itemgetter(1), reverse = True)
+    number=[]
+    for items in q:
+        number.append(items[0])
+    return number
 
 def recommend_by_num_common_friends(graph, user):
     """
@@ -149,7 +225,9 @@ def recommend_by_num_common_friends(graph, user):
     case of a tie in number of common friends, the names/IDs are
     sorted by their natural sort order, from least to greatest.
     """
-    pass
+    common_map = num_common_friends_map(graph, user)
+    return num_map_to_sorted_list(common_map)
+
 
 
 ###
@@ -163,9 +241,19 @@ def influence_map(graph, user):
     user and are neither the user nor one of the users's friends.
     See the assignment writeup for the definition of influence scores.
     """
-    pass
 
 
+
+
+
+
+
+
+
+
+
+
+    
 def recommend_by_influence(graph, user):
     """Return a list of friend recommendations for the given user.
     The friend recommendation list consists of names/IDs of people in
@@ -175,7 +263,28 @@ def recommend_by_influence(graph, user):
     case of a tie in influence score, the names/IDs are sorted
     by their natural sort order, from least to greatest.
     """
-    pass
+    influence = influence_map(graph, user)
+    items = list(influence.items())
+    
+    n = len(items)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            val1 = items[j][1]
+            val2 = items[j+1][1]
+            key1 = items[j][0]
+            key2 = items[j+1][0]
+            
+            if val1 < val2:
+                items[j], items[j+1] = items[j+1], items[j]
+            elif val1 == val2 and key1 > key2:
+                items[j], items[j+1] = items[j+1], items[j]
+    
+    # 提取排序后的键
+    sorted_keys = []
+    for item in items:
+        sorted_keys.append(item[0])
+    
+    return sorted_keys
 
 
 ###
@@ -186,9 +295,7 @@ def get_facebook_graph():
     """Builds and returns the facebook graph
     """
 
-    # (Your Problem 5 code goes here.)
-    pass
-
+  
 
 def main():
     practice_graph = get_practice_graph()
@@ -211,6 +318,34 @@ def main():
     print()
 
     # (Your Problem 4 code goes here.)
+    user = "Mercutio"
+    
+    # Get recommendations from both algorithms
+    rec_by_common = recommend_by_num_common_friends(rj, user)
+    rec_by_influence = recommend_by_influence(rj, user)
+    
+    # Find common recommendations
+    common_recs = []
+    for person in rec_by_common:
+        if person in rec_by_influence:
+            common_recs.append(person)
+    
+    # Find different recommendations
+    diff_recs = []
+    for person in rec_by_common:
+        if person not in rec_by_influence:
+            diff_recs.append(person)
+    for person in rec_by_influence:
+        if person not in rec_by_common:
+            diff_recs.append(person)
+    
+    # Sort the results alphabetically
+    common_recs.sort()
+    diff_recs.sort()
+    
+    # Print results
+    print("Same recommendations:", common_recs)
+    print("Different recommendations:", diff_recs)
 
     ###
     #  Problem 5
